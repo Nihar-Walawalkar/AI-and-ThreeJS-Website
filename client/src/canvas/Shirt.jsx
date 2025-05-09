@@ -10,8 +10,33 @@ const Shirt = () => {
   const snap = useSnapshot(state);
   const { nodes, materials } = useGLTF("/shirt_baked.glb");
 
-  const logoTexture = useTexture(snap.logoDecal);
-  const fullTexture = useTexture(snap.fullDecal);
+  // Load textures with error handling
+  const logoTexture = useTexture(snap.logoDecal, (texture) => {
+    if (texture instanceof Error) {
+      console.error(
+        "Failed to load logo texture:",
+        snap.logoDecal,
+        texture.message
+      );
+    } else {
+      console.log("Logo texture loaded successfully:", snap.logoDecal);
+      // Set anisotropy if supported (optional)
+      texture.anisotropy = texture.anisotropy
+        ? Math.min(16, texture.anisotropy)
+        : 1;
+    }
+  });
+  const fullTexture = useTexture(snap.fullDecal, (texture) => {
+    if (texture instanceof Error) {
+      console.error(
+        "Failed to load full texture:",
+        snap.fullDecal,
+        texture.message
+      );
+    } else {
+      console.log("Full texture loaded successfully:", snap.fullDecal);
+    }
+  });
 
   useFrame((state, delta) =>
     easing.dampC(materials.lambert1.color, snap.color, 0.25, delta)
@@ -28,7 +53,7 @@ const Shirt = () => {
         material-roughness={1}
         dispose={null}
       >
-        {snap.isFullTexture && (
+        {snap.isFullTexture && fullTexture && !fullTexture.message && (
           <Decal
             position={[0, 0, 0]}
             rotation={[0, 0, 0]}
@@ -37,13 +62,12 @@ const Shirt = () => {
           />
         )}
 
-        {snap.isLogoTexture && (
+        {snap.isLogoTexture && logoTexture && !logoTexture.message && (
           <Decal
             position={[0, 0.04, 0.15]}
             rotation={[0, 0, 0]}
             scale={0.15}
             map={logoTexture}
-            map-anisotropy={16}
             depthTest={false}
             depthWrite={true}
           />
