@@ -27,8 +27,6 @@
 - [Getting Started](#-getting-started)
 - [File Structure](#-file-structure)
 - [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
 
 ---
 
